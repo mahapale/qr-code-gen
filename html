@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Code Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+      background-color: #f4f4f4;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      width: 300px;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #000;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #333;
+    }
+
+    #qrcode {
+      margin-top: 30px;
+    }
+
+    .shortcut-bubble {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: #000;
+      color: #fff;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+    }
+
+    .shortcut-panel {
+      position: fixed;
+      bottom: 80px;
+      right: 20px;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 10px;
+      display: none;
+      flex-direction: column;
+      width: 250px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .shortcut-panel textarea {
+      width: 100%;
+      height: 100px;
+      font-size: 14px;
+      padding: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>QR Code Generator</h1>
+  <input type="text" id="qrText" placeholder="Enter e.g. 1 45, cs, or kerim" />
+  <button onclick="generateQRCode()">Generate QR Code</button>
+  <div id="qrcode"></div>
+
+  <div class="shortcut-bubble" onclick="toggleShortcuts()">+</div>
+  <div class="shortcut-panel" id="shortcutPanel">
+    <label><strong>Shortcuts (key=value):</strong></label>
+    <textarea id="shortcutsBox" placeholder="Add shortcuts here...\nexample: test=My QR Text"></textarea>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script>
+    function toggleShortcuts() {
+      const panel = document.getElementById("shortcutPanel");
+      panel.style.display = panel.style.display === "flex" ? "none" : "flex";
+    }
+
+    function generateQRCode() {
+      const input = document.getElementById("qrText").value.trim();
+      const qrCodeContainer = document.getElementById("qrcode");
+      const shortcutsBox = document.getElementById("shortcutsBox").value.trim();
+      qrCodeContainer.innerHTML = "";
+
+      let finalText = input;
+
+      const shortcutLines = shortcutsBox.split("\n");
+      const shortcuts = {};
+      shortcutLines.forEach(line => {
+        const [key, value] = line.split("=");
+        if (key && value) {
+          shortcuts[key.trim().toLowerCase()] = value.trim();
+        }
+      });
+
+      if (shortcuts[input.toLowerCase()]) {
+        finalText = shortcuts[input.toLowerCase()];
+      } else if (input.toLowerCase() === "cs") {
+        finalText = "002_CENTRALNO_SKLADISTE";
+      } else if (input.toLowerCase() === "kerim") {
+        finalText = "029_PRIJEMNA KONTROLA";
+      } else {
+        const parts = input.split(" ");
+        if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+          finalText = `K${parts[0]}/${parts[1]}`;
+        }
+      }
+
+      if (finalText !== "") {
+        new QRCode(qrCodeContainer, {
+          text: finalText,
+          width: 200,
+          height: 200
+        });
+      }
+    }
+  </script>
+</body>
+</html>
